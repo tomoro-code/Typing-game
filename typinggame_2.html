@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <title>タイピングゲーム2</title>
+        <style>
+            body{
+                text-align: center;
+                font-family: "Niagara Solid";
+            }
+            #titleArea{
+                font-size: 4rem;
+            }
+            #counterField{
+                background-color: orange;
+                height: 50px;
+            }
+            #timerField{
+                font-size: 3rem;
+            }
+            #textArea{
+                height: 100px;
+                background-color: peachpuff;
+            }
+            #untyped{
+                font-size: 5rem;
+            }
+            #typedArea{
+                height: 100px;
+            }
+            #typedField{
+                color: red;
+                font-size: 5rem;
+                height: 100px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="titleArea">How fast you type?</div>
+        <div id="counterField">
+            <span id="timerField"></span><br>
+        </div>
+        <div id="textArea">
+            <span id="untyped"></span>
+        </div>
+        <div id="typedArea">
+            <span id="typedField"></span>
+        </div>
+        <div>
+            <button id="startButton">start</button>
+            <button id="reset">reset</button>
+        </div>
+        <div>
+             <audio id="click" src="keyboard1_trim.mp3"></audio>
+        </div>
+
+        <script>
+            const $typedField = document.getElementById("typedField");
+            const $untypedField = document.getElementById("untyped");
+            const $startButton = document.getElementById("startButton");
+            const $resetButton = document.getElementById("reset");
+            const $timerField = document.getElementById("timerField");
+            const $clickSound = document.getElementById("click");
+            
+            //問題となるテキスト群
+            let untypedTexts;
+            //タイプされた文字列
+            let typed;
+            //問題番号
+            let indexNum = 0;
+            //経過時間
+            let time;
+            //intervalID_2
+            let intervalID_1;
+
+            //配列「untypedTexts」をシャッフル
+            function shuffleArray(){
+                for(let i = untypedTexts.length - 1; i >= 0; i--){
+                    const randomIndex = Math.floor(Math.random() * (i + 1));
+                    [untypedTexts[i], untypedTexts[randomIndex]] = [untypedTexts[randomIndex], untypedTexts[i]];
+                }
+            }
+
+            function beforeStart(){
+                untypedTexts = [
+                    "HelloWorld",
+                    "GoogleChrome",
+                    "JavaScript",
+                    "December",
+                    "Jasmine",
+                    "notebook",
+                    "July"
+                ];
+                shuffleArray();
+                typed = "";
+                $untypedField.textContent = "Click [start] button";
+                time = 0;
+                indexNum = 0;
+                $timerField.textContent = time;
+                $typedField.textContent = typed;
+            }
+            //タイピングする文字列を設置
+            function setupText() {
+                $untypedField.textContent = untypedTexts[indexNum];
+            }
+            //タイマー開始
+            function startTimer(){
+                intervalID_1 = setInterval(function(){
+                    time+=0.1;
+                    $timerField.textContent = time.toFixed(1);
+                },100);
+            }
+            //タイマーを止める
+            function stopTimer(){
+                clearInterval(intervalID_1);
+            }
+            //要素非表示
+            function disappearElements(){
+                $startButton.style.display = "none";
+            }
+            //要素表示
+            function appearElements(){
+                $startButton.style.display = "inline";
+            }
+            //キーが押されたら実行される処理
+            function keyEvent(){
+                document.addEventListener("keydown", function(e){
+                    if(e.key === untypedTexts[indexNum].substring(0,1)){
+                        $clickSound.play();
+                        typed += untypedTexts[indexNum].substring(0,1);
+                        untypedTexts[indexNum] = untypedTexts[indexNum].substring(1);
+                        $typedField.textContent = typed;
+                    }
+                    if(untypedTexts[indexNum] === ""){
+                        untypedTexts[indexNum] = typed;
+                        typed = "";
+                        $typedField.textContent = typed;
+                        indexNum++;
+                        setupText();
+                    }
+                    if(indexNum >= untypedTexts.length){
+                        stopTimer();
+                        window.alert("Your result is " + time.toFixed(1) + " second.");
+                        $untypedField.textContent = time.toFixed(1) + " sec";
+                    }
+                });
+            }
+
+            $startButton.addEventListener("click", function(){
+                setupText();
+                keyEvent();
+                startTimer();
+                disappearElements();
+            });
+
+            $resetButton.addEventListener("click", function(){
+                clearInterval(intervalID_1);
+                beforeStart();
+                appearElements();
+            })
+
+            window.onload = beforeStart();
+
+        </script>
+    </body>
+</html>
